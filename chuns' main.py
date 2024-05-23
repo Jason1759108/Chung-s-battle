@@ -29,7 +29,7 @@ pygame.display.update()
 
 #匯入需要的全域圖片
 heart_image = pygame.image.load("picture/heart.png")
-mainMenuBg = pygame.image.load("picture/main_bg.jpg")
+mainMenuBg = pygame.image.load("picture/main_bg.jpg").convert()
 mainMenuBg = pygame.transform.scale(mainMenuBg,(w,h))
 
 #所有會顯現的東西
@@ -145,7 +145,7 @@ class Menu():
     def __init__(self, surface : pygame.Surface):
         self.buttons = []
         self.surface = surface
-        surface.fill((0,0,0))
+        surface.fill((0,0,0,0))
     def add_text(self , text : str , pos , fontSize = 35 , font = "Arial"):
         font = pygame.font.SysFont(font,fontSize)
         text = font.render(text,True,(255,255,255))
@@ -162,10 +162,6 @@ class Menu():
         for detail in details:
             self.buttons.append(Button(detail[0],self.surface,detail[1]))
             self.buttons[-1].draw()
-    def draw(self):
-        self.surface.fill((0,0,0,0))
-        for button in self.buttons:
-            button.draw()
     def update(self):
         ret = -1
         for event in pygame.event.get():
@@ -174,7 +170,10 @@ class Menu():
                     if self.buttons[index].rect.collidepoint(event.pos):
                         self.buttons[index].clicked = not self.buttons[index].clicked
                         ret = index
-        self.draw()
+        self.surface.fill((0,0,0,0))
+        for button in self.buttons:
+            button.draw()
+            print(button)
         return ret
     
 class CoolBar(pygame.sprite.Sprite):
@@ -287,18 +286,20 @@ class Player(item):
 P1 = Player(False)
 P2 = Player(True)
 def help():
+    bg.fill((0,0,0,0))
+    window.blit(bg,(0,0))
     helpMenu = Menu(menu_surface)
     helpMenu.add_text("測試",(w/2,100))
     helpMenu.add_button("Return",(w/2,800))
-    window.blit(menu_surface,(0,0))
-    pygame.display.update()
     while True:
+        window.blit(menu_surface,(0,0))
+        pygame.display.update()
         if helpMenu.update() >= 0:
-            menu_surface.fill((0,0,0))
+            menu_surface.fill((0,0,0,0))
             return
 
 def menu_phase():
-    bg.blit(menu_surface,(0,0))
+    bg.blit(mainMenuBg,(0,0))
     window.blit(bg,(0,0))
     mainMenu = Menu(menu_surface)
     mainMenu.add_buttons([("Start",(w/2,100)),("Help",(w/2,200)),("Quit",(w/2,800))])
@@ -306,12 +307,15 @@ def menu_phase():
     pygame.display.update()
     while True:
         res = mainMenu.update()
-        menu_surface.blit(mainMenuBg,(0,0))
+        window.blit(menu_surface,(0,0))
         pygame.display.update()
         if res == 0:
             return
         if res == 1:
             help()
+            mainMenu.buttons[1].clicked = False
+            bg.blit(mainMenuBg,(0,0))
+            window.blit(bg,(0,0))
         elif res == 2:
             pygame.quit()
             sys.exit()
