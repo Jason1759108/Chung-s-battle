@@ -146,12 +146,12 @@ class Menu():
         self.buttons = []
         self.surface = surface
         surface.fill((0,0,0))
-    def add_text(self , text : str , pos , fontSize = 35 , font = "Arial"):
+    def add_text(self , text : str , pos , fontSize = 35 , font = "PMingLiU"):
         font = pygame.font.SysFont(font,fontSize)
         text = font.render(text,True,(255,255,255))
         rect = text.get_rect()
         rect.center = pos
-        bg.blit(text,rect)
+        self.surface.blit(text,rect)
         return
     def add_picture(self):
         return #之後要補    
@@ -173,6 +173,9 @@ class Menu():
                     if self.buttons[index].rect.collidepoint(event.pos):
                         self.buttons[index].clicked = not self.buttons[index].clicked
                         ret = index
+            elif event.type == QUIT:
+                pygame.quit()
+                sys.exit()
         self.draw()
         return ret
     
@@ -294,7 +297,7 @@ def help():
     while True:
         res = helpMenu.update()
         if res >= 0:
-            return  # 正確返回
+            return 
         window.blit(menu_surface, (0, 0))
         pygame.display.update()
         for event in pygame.event.get():
@@ -302,16 +305,12 @@ def help():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if helpMenu.buttons[0].rect.collidepoint(event.pos):  # "Return" 按鈕
+                if helpMenu.buttons[0].rect.collidepoint(event.pos):  
                     return
 
-def menu_phase():
-    bg.blit(menu_surface,(0,0))
-    window.blit(bg,(0,0))
+def menu_phase(): 
     mainMenu = Menu(menu_surface)
     mainMenu.add_buttons([("Start",(w/2,100)),("Help",(w/2,200)),("Quit",(w/2,800))])
-    window.blit(menu_surface,(0,0))
-    pygame.display.update()
     while True:
         menu_surface.blit(mainMenuBg,(0,0))
         mainMenu.draw()
@@ -342,8 +341,9 @@ def choose_skills(player : bool):
     window.blit(bg,(0,0))
     while cnt:
         res = skillMenu.update()
-        window.blit(menu_surface,(0,0))
+        window.blit(menu_surface, (0, 0))
         pygame.display.update()
+        skillMenu.add_text("Player " + str(player+1),(300,30))
         if res == -1:continue
         if skillMenu.buttons[res].clicked:
             cnt -= 1
@@ -351,6 +351,10 @@ def choose_skills(player : bool):
         if res == 5:
             pygame.quit()
             sys.exit()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
     for i in range(len(skillList)):
         if skillMenu.buttons[i].clicked:
             (P2 if player else P1).skills.append(skillList[i])
