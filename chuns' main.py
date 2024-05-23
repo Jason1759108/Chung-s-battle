@@ -223,33 +223,20 @@ class Player(item):
         for i in range(3):
             self.coolBars.add(CoolBar("Bullet "+ str(i+1) , self.isFlip , i , self.skills[i].waitTime))
         return
-    def shoot1(self):
-        if self.wait[0] == 0: 
-            theskill = self.skills[0](self.rect.center,self.isFlip)
-            if isinstance(theskill,Shield):
-                self.shields.add(theskill)
+    def shoot(self,index):
+        if self.wait[index] == 0:
+            if self.skills[index] == Bullet2:
+                for _ in range(7):
+                    bullet = self.skills[index](self.rect.center,self.isFlip)
+                    self.bullets.add(bullet)
+            elif self.skills[index] == Shield:
+                shield = self.skills[index](self.rect.center,self.isFlip)
+                self.shields.add(shield)
                 self.shield_exist_time = 60
             else:
-                self.bullets.add(theskill)
-            self.wait[0] = self.skills[0].waitTime
-    def shoot2(self):
-        if self.wait[1] == 0:
-            theskill = self.skills[1](self.rect.center,self.isFlip)
-            if isinstance(theskill,Shield):
-                self.shields.add(theskill)
-                self.shield_exist_time = 60
-            else:
-                self.bullets.add(theskill)
-            self.wait[1] = self.skills[1].waitTime
-    def shoot3(self):
-        if self.wait[2] == 0:
-            theskill = self.skills[2](self.rect.center,self.isFlip)
-            if isinstance(theskill,Shield):
-                self.shields.add(theskill)
-                self.shield_exist_time = 60
-            else:
-                self.bullets.add(theskill)
-            self.wait[2] = self.skills[2].waitTime
+                bullet = self.skills[index](self.rect.center,self.isFlip)
+                self.bullets.add(bullet)
+            self.wait[index] = self.skills[index].waitTime
     def up(self):
         if self.rect.y >= 5:
             self.rect.y -= 5
@@ -378,11 +365,11 @@ while P1.HP and P2.HP:
     if keys[pygame.K_d]:
         P1.right()
     if keys[pygame.K_j]:
-        P1.shoot1()
+        P1.shoot(0)
     if keys[pygame.K_k]:
-        P1.shoot2()
+        P1.shoot(1)
     if keys[pygame.K_l]:
-        P1.shoot3()
+        P1.shoot(2)
     
     if keys[pygame.K_UP]:
         P2.up()
@@ -393,11 +380,11 @@ while P1.HP and P2.HP:
     if keys[pygame.K_RIGHT]:
         P2.right()
     if keys[pygame.K_KP1]:
-        P2.shoot1()
+        P2.shoot(0)
     if keys[pygame.K_KP2]:
-        P2.shoot2()
+        P2.shoot(1)
     if keys[pygame.K_KP3]:
-        P2.shoot3()
+        P2.shoot(2)
 
     window.blit(bg, (0, 0))
     game_surface.fill((0,0,0,0))
