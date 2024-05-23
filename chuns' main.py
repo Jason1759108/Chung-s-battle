@@ -163,7 +163,6 @@ class Menu():
             self.buttons.append(Button(detail[0],self.surface,detail[1]))
             self.buttons[-1].draw()
     def draw(self):
-        self.surface.fill((0,0,0,0))
         for button in self.buttons:
             button.draw()
     def update(self):
@@ -293,9 +292,18 @@ def help():
     window.blit(menu_surface,(0,0))
     pygame.display.update()
     while True:
-        if helpMenu.update() >= 0:
-            menu_surface.fill((0,0,0))
-            return
+        res = helpMenu.update()
+        if res >= 0:
+            return  # 正確返回
+        window.blit(menu_surface, (0, 0))
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if helpMenu.buttons[0].rect.collidepoint(event.pos):  # "Return" 按鈕
+                    return
 
 def menu_phase():
     bg.blit(menu_surface,(0,0))
@@ -305,8 +313,10 @@ def menu_phase():
     window.blit(menu_surface,(0,0))
     pygame.display.update()
     while True:
-        res = mainMenu.update()
         menu_surface.blit(mainMenuBg,(0,0))
+        mainMenu.draw()
+        res = mainMenu.update()
+        window.blit(menu_surface, (0, 0))
         pygame.display.update()
         if res == 0:
             return
@@ -315,6 +325,10 @@ def menu_phase():
         elif res == 2:
             pygame.quit()
             sys.exit()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
 skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
 def choose_skills(player : bool):
@@ -413,4 +427,3 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-#123
