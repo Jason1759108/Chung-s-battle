@@ -29,6 +29,8 @@ pygame.display.update()
 
 #匯入需要的全域圖片
 heart_image = pygame.image.load("picture/heart.png")
+mainMenuBg = pygame.image.load("picture/main_bg.jpg")
+mainMenuBg = pygame.transform.scale(mainMenuBg,(w,h))
 
 #所有會顯現的東西
 class item(pygame.sprite.Sprite):
@@ -292,16 +294,19 @@ def help():
     pygame.display.update()
     while True:
         if helpMenu.update() >= 0:
+            menu_surface.fill((0,0,0))
             return
 
 def menu_phase():
+    bg.blit(menu_surface,(0,0))
+    window.blit(bg,(0,0))
     mainMenu = Menu(menu_surface)
     mainMenu.add_buttons([("Start",(w/2,100)),("Help",(w/2,200)),("Quit",(w/2,800))])
     window.blit(menu_surface,(0,0))
     pygame.display.update()
     while True:
         res = mainMenu.update()
-        window.blit(menu_surface,(0,0))
+        menu_surface.blit(mainMenuBg,(0,0))
         pygame.display.update()
         if res == 0:
             return
