@@ -17,14 +17,11 @@ pygame.display.set_caption("彈幕對戰")
 bg = pygame.Surface(window.get_size(),pygame.SRCALPHA) #背景
 bg = bg.convert()
 bg.fill((0, 0, 0))
-pygame.draw.line(bg, (255, 255, 255), (300, 0), (300, 900), 4)
-pygame.draw.line(bg, (255, 255, 255), (w-300, 0), (w-300, 900), 4)
-pygame.draw.line(bg, (100, 100, 100), (w/2, 0), (w/2, 900), 4)
 game_surface = pygame.Surface(window.get_size(),pygame.SRCALPHA) #遊戲區塊
 game_surface.fill((0,0,0,0))
 information = pygame.Surface(window.get_size(),pygame.SRCALPHA) #資訊區塊
 information.fill((0,0,0,0))
-menu_surface = pygame.Surface(window.get_size())
+menu_surface = pygame.Surface(window.get_size(),pygame.SRCALPHA)
 window.blit(bg, (0, 0))
 window.blit(game_surface, (0, 0))
 window.blit(information, (0, 0))
@@ -117,20 +114,17 @@ class Shield(item):
         super().__init__(isFlip,"picture/shield.png",game_surface,pos)
 
 class Button(pygame.sprite.Sprite):
-    text = None
-    rect = None
-    surface = None
     text_color = (0,0,0)
     bg_color = (255,255,255)
-    click_color = (255,255,255)
+    click_color = (50,50,255)
     font = pygame.font.SysFont("Arial",35)
-    clicked = False
     def __init__(self,text : str,surface : pygame.Surface , pos):
         super().__init__()
         self.text = self.font.render(text,True,self.text_color)
         self.rect = self.text.get_rect()
         self.rect.center = pos
         self.surface = surface
+        self.clicked = False
         return
     def set_text(self,text : str):
         self.text = self.font.render(text,True,self.text_color)
@@ -155,7 +149,7 @@ class Menu():
         text = font.render(text,True,(255,255,255))
         rect = text.get_rect()
         rect.center = pos
-        self.surface.blit(text,rect)
+        bg.blit(text,rect)
         return
     def add_picture(self):
         return #之後要補    
@@ -167,17 +161,19 @@ class Menu():
             self.buttons.append(Button(detail[0],self.surface,detail[1]))
             self.buttons[-1].draw()
     def draw(self):
-        self.surface.fill((0,0,0))
+        self.surface.fill((0,0,0,0))
         for button in self.buttons:
             button.draw()
     def update(self):
+        ret = -1
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for index in range(len(self.buttons)):
                     if self.buttons[index].rect.collidepoint(event.pos):
-                        self.buttons[index].clicked = True
-                        return index
-        return -1
+                        self.buttons[index].clicked = not self.buttons[index].clicked
+                        ret = index
+        self.draw()
+        return ret
     
 class CoolBar(pygame.sprite.Sprite):
     fullSize = 400
@@ -209,18 +205,21 @@ class Player(item):
     def __init__(self,isFlip):
         super().__init__(isFlip,"picture/circle face.png",game_surface,(w - 200 , 450) if isFlip else (200 , 450))
         self.wait = [0 for _ in range(5)]
-        self.skills = [None for _ in range(5)]
+        self.skills = []
         self.bullets = pygame.sprite.Group()
         self.coolBars = pygame.sprite.Group()
         self.shields = pygame.sprite.Group()
         for i in range(self.HP):
             information.blit(heart_image,(120+self.isFlip*(w-380)+i*50,10))        
     def set_skills(self,skill1,skill2,skill3 = 0 ,skill4 = 0 ,skill5 = 0):
+        self.skills = [None for _ in range(5)]
         self.skills[0] = skill1
         self.skills[1] = skill2
         self.skills[2] = skill3
         self.skills[3] = skill4
         self.skills[4] = skill5
+        return
+    def buildCoolBar(self):
         for i in range(3):
             self.coolBars.add(CoolBar("Bullet "+ str(i+1) , self.isFlip , i , self.skills[i].waitTime))
         return
@@ -315,53 +314,53 @@ def menu_phase():
     pygame.display.update()
     while True:
         res = mainMenu.update()
+        window.blit(menu_surface,(0,0))
+        pygame.display.update()
         if res == 0:
             return
         if res == 1:
             help()
-            window.fill((0,0,0))
-            mainMenu.draw()
-            window.blit(menu_surface,(0,0))
-            pygame.display.update()
         elif res == 2:
             pygame.quit()
             sys.exit()
 
+skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
 def choose_skills(player : bool):
     skillMenu = Menu(menu_surface)
+    bg.fill((0,0,0,0))
     skillMenu.add_text("Player " + str(player+1),(300,30))
     skillMenu.add_buttons([("Normal Bullet",(w/3,100)),("Shot",(2*w/3,100)),("Large Bullet",(w/3,200)),("Fast Bullet",(2*w/3,200)),("Shield",(w/3,300)),("Quit",(w/2,800)),])
     window.blit(menu_surface,(0,0))
     pygame.display.update()
     cnt = 3
-    s = []
+    window.blit(bg,(0,0))
     while cnt:
         res = skillMenu.update()
-        if res == 0:
-            s.append(Bullet1)
+        window.blit(menu_surface,(0,0))
+        pygame.display.update()
+        if res == -1:continue
+        if skillMenu.buttons[res].clicked:
             cnt -= 1
-        if res == 1:
-            s.append(Bullet2)
-            cnt -= 1
-        if res == 2:
-            s.append(Bullet3)
-            cnt -= 1
-        if res == 3:
-            s.append(Bullet4)
-            cnt -= 1
-        if res == 4:
-            s.append(Shield)
-            cnt -= 1
+        else:cnt += 1
         if res == 5:
             pygame.quit()
             sys.exit()
-    (P2 if player else P1).set_skills(s[0],s[1],s[2])
+    for i in range(len(skillList)):
+        if skillMenu.buttons[i].clicked:
+            (P2 if player else P1).skills.append(skillList[i])
+    return
         
         
 menu_phase()
 choose_skills(False)
 choose_skills(True)
+P1.buildCoolBar()
+P2.buildCoolBar()
 
+bg.fill((0,0,0))
+pygame.draw.line(bg, (255, 255, 255), (300, 0), (300, 900), 4)
+pygame.draw.line(bg, (255, 255, 255), (w-300, 0), (w-300, 900), 4)
+pygame.draw.line(bg, (100, 100, 100), (w/2, 0), (w/2, 900), 4)
 
 while P1.HP and P2.HP:
     for event in pygame.event.get():
@@ -411,7 +410,6 @@ while P1.HP and P2.HP:
     fpsClock.tick(FPS)  # 控制幀率
 
 #最後一次更新
-window.blit(bg, (0, 0))
 game_surface.fill((0,0,0,0))
 P2.update()
 P1.update()
