@@ -146,23 +146,28 @@ class Menu():
         self.buttons = []
         self.surface = surface
         surface.fill((0,0,0,0))
-    def add_text(self , text : str , pos , fontSize = 35 , font = "Arial"):
+        self.other = []
+    def add_text(self , text : str , pos , fontSize = 35 , font = "PMingLiU"):
         font = pygame.font.SysFont(font,fontSize)
         text = font.render(text,True,(255,255,255))
         rect = text.get_rect()
         rect.center = pos
-        bg.blit(text,rect)
+        self.other.append((text,rect))
         return
     def add_picture(self):
         return #之後要補    
     def add_button(self,text : str  ,pos):
         self.buttons.append(Button(text,self.surface,pos))
-        self.buttons[-1].draw()
     def add_buttons(self,details : list):
         for detail in details:
             self.buttons.append(Button(detail[0],self.surface,detail[1]))
-            self.buttons[-1].draw()
+    def draw(self):
+        for button in self.buttons:
+            button.draw()
+        for i in self.other:
+            self.surface.blit(i[0],i[1])
     def update(self):
+        self.surface.fill((0,0,0,0))
         ret = -1
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -170,10 +175,10 @@ class Menu():
                     if self.buttons[index].rect.collidepoint(event.pos):
                         self.buttons[index].clicked = not self.buttons[index].clicked
                         ret = index
-        self.surface.fill((0,0,0,0))
-        for button in self.buttons:
-            button.draw()
-            print(button)
+            elif event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+        self.draw()
         return ret
     
 class CoolBar(pygame.sprite.Sprite):
@@ -292,22 +297,28 @@ def help():
     helpMenu.add_text("測試",(w/2,100))
     helpMenu.add_button("Return",(w/2,800))
     while True:
-        window.blit(menu_surface,(0,0))
+        res = helpMenu.update()
+        if res >= 0:
+            return 
+        window.blit(menu_surface, (0, 0))
         pygame.display.update()
-        if helpMenu.update() >= 0:
-            menu_surface.fill((0,0,0,0))
-            return
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if helpMenu.buttons[0].rect.collidepoint(event.pos):  
+                    return
 
-def menu_phase():
+def menu_phase(): 
     bg.blit(mainMenuBg,(0,0))
     window.blit(bg,(0,0))
     mainMenu = Menu(menu_surface)
     mainMenu.add_buttons([("Start",(w/2,100)),("Help",(w/2,200)),("Quit",(w/2,800))])
-    window.blit(menu_surface,(0,0))
-    pygame.display.update()
     while True:
+        mainMenu.draw()
         res = mainMenu.update()
-        window.blit(menu_surface,(0,0))
+        window.blit(menu_surface, (0, 0))
         pygame.display.update()
         if res == 0:
             return
@@ -319,6 +330,7 @@ def menu_phase():
         elif res == 2:
             pygame.quit()
             sys.exit()
+        #event.get做一次就好
 
 skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
 def choose_skills(player : bool):
@@ -332,8 +344,9 @@ def choose_skills(player : bool):
     window.blit(bg,(0,0))
     while cnt:
         res = skillMenu.update()
-        window.blit(menu_surface,(0,0))
+        window.blit(menu_surface, (0, 0))
         pygame.display.update()
+        skillMenu.add_text("Player " + str(player+1),(300,30))
         if res == -1:continue
         if skillMenu.buttons[res].clicked:
             cnt -= 1
@@ -341,6 +354,10 @@ def choose_skills(player : bool):
         if res == 5:
             pygame.quit()
             sys.exit()
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
     for i in range(len(skillList)):
         if skillMenu.buttons[i].clicked:
             (P2 if player else P1).skills.append(skillList[i])
@@ -417,4 +434,3 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-#123
