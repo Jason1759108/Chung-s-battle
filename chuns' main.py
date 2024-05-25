@@ -337,21 +337,27 @@ def choose_skills(player : bool):
     skillMenu = Menu(menu_surface)
     bg.fill((0,0,0,0))
     skillMenu.add_text("Player " + str(player+1),(300,30))
-    skillMenu.add_buttons([("Normal Bullet",(w/3,100)),("Shot",(2*w/3,100)),("Large Bullet",(w/3,200)),("Fast Bullet",(2*w/3,200)),("Shield",(w/3,300)),("Quit",(w/2,800)),])
+    skillMenu.add_buttons([("Normal Bullet",(w/3,100)),("Shot",(2*w/3,100)),("Large Bullet",(w/3,200)),("Fast Bullet",(2*w/3,200)),("Shield",(w/3,300)),("Confirm",(w/2,500)),("Quit",(w/2,800)),])
     window.blit(menu_surface,(0,0))
     pygame.display.update()
     cnt = 3
     window.blit(bg,(0,0))
-    while cnt:
+    while True:
         res = skillMenu.update()
         window.blit(menu_surface, (0, 0))
         pygame.display.update()
         skillMenu.add_text("Player " + str(player+1),(300,30))
+        if res == 5:
+            if cnt == 0:
+                break
+            skillMenu.buttons[5].clicked = False
+            #要能顯現錯誤訊息
+            continue
         if res == -1:continue
         if skillMenu.buttons[res].clicked:
             cnt -= 1
         else:cnt += 1
-        if res == 5:
+        if res == 6:
             pygame.quit()
             sys.exit()
         for event in pygame.event.get():
