@@ -34,6 +34,7 @@ mainMenuBg = pygame.transform.scale(mainMenuBg,(w,h))
 
 #載入需要的音效
 confirmSound = pygame.mixer.Sound("voice/你要確認欸.wav")
+injurySound = pygame.mixer.Sound("Voice/咳嗽.wav")
 
 #所有會顯現的東西
 class item(pygame.sprite.Sprite):
@@ -61,9 +62,7 @@ class Bullet(item):
         if pygame.sprite.collide_rect(self,P1 if self.isFlip else P2):
             (P1 if self.isFlip else P2).HP -= self.dHP
             self.rect.x = -1 if self.isFlip else w+1
-                  
-            for i in range(P2.HP):
-                information.blit(heart_image,(120+(w-380)+i*50,10))
+            injurySound.play()
 
         for s in P1.shields if self.isFlip else P2.shields:
             if pygame.sprite.collide_rect(self,s):
@@ -279,12 +278,15 @@ class Player(item):
                 self.shield_exist_time -= 1
                 s.rect.x = self.rect.x -110 if self.isFlip else self.rect.x + 130
                 s.rect.y = self.rect.y - 58
-                s.draw()
-        for i in range(self.HP):
-                information.blit(heart_image,((w-380 if self.isFlip else 0)+120+i*50,10))  
-        if self.HP == 0:
+                s.draw() 
+        if self.HP <= 0:
             self.image = pygame.image.load("picture/circle die.png").convert()
             self.image = pygame.transform.flip(self.image,self.isFlip,0)
+        else:
+            for i in range(self.HP):
+                information.blit(heart_image,((w-380 if self.isFlip else 0)+120+i*50,10))
+            
+
         for coolBar in self.coolBars:
             coolBar.update()
 
@@ -385,7 +387,7 @@ pygame.draw.line(bg, (255, 255, 255), (300, 0), (300, 900), 4)
 pygame.draw.line(bg, (255, 255, 255), (w-300, 0), (w-300, 900), 4)
 pygame.draw.line(bg, (100, 100, 100), (w/2, 0), (w/2, 900), 4)
 
-while P1.HP and P2.HP:
+while P1.HP > 0 and P2.HP > 0:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -425,19 +427,22 @@ while P1.HP and P2.HP:
     window.blit(bg, (0, 0))
     game_surface.fill((0,0,0,0))
     information.fill((0,0,0,0))
-    P2.update()
     P1.update()
+    P2.update()
     window.blit(game_surface,(0,0))
     window.blit(information,(0,0))
     pygame.display.update()
     fpsClock.tick(FPS)  # 控制幀率
 
 #最後一次更新
+information.fill((0,0,0,0))
 game_surface.fill((0,0,0,0))
-P2.update()
 P1.update()
+P2.update()   
+window.blit(bg,(0,0))
 window.blit(game_surface,(0,0))
 window.blit(information,(0,0))
+
 pygame.display.update()
 while True:
     for event in pygame.event.get():
