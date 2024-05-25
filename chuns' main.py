@@ -32,6 +32,9 @@ heart_image = pygame.image.load("picture/heart.png")
 mainMenuBg = pygame.image.load("picture/main_bg.jpg").convert()
 mainMenuBg = pygame.transform.scale(mainMenuBg,(w,h))
 
+#載入需要的音效
+confirmSound = pygame.mixer.Sound("voice/你要確認欸.wav")
+
 #所有會顯現的東西
 class item(pygame.sprite.Sprite):
     isFlip = 0
@@ -348,6 +351,7 @@ def choose_skills(player : bool):
         pygame.display.update()
         skillMenu.add_text("Player " + str(player+1),(300,30))
         if res == 5:
+            confirmSound.play()
             if cnt == 0:
                 break
             skillMenu.buttons[5].clicked = False
