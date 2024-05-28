@@ -141,6 +141,19 @@ class Button(pygame.sprite.Sprite):
         pygame.draw.rect(self.surface,self.click_color if self.clicked else self.bg_color,self.rect)
         self.surface.blit(self.text,self.rect)
         return
+class ButtonByPath(pygame.sprite.Sprite):
+    def __init__(self,path:str,click_path:str,surface:pygame.Surface,pos:tuple):
+        super().__init__()
+        self.image = pygame.image.load(path)
+        self.ckicked_image = pygame.image.load(click_path)
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.surface = surface
+        self.clicked = False
+        return
+    def draw(self):
+        self.surface.blit(self.ckicked_image if self.clicked else self.image,self.rect)
+        return
 
 class Menu():
     surface = None
@@ -163,6 +176,9 @@ class Menu():
     def add_buttons(self,details : list):
         for detail in details:
             self.buttons.append(Button(detail[0],self.surface,detail[1]))
+    def add_buttons_by_path(self,details:list):
+        for detail in details:
+            self.buttons.append(ButtonByPath(detail[0],detail[1],self.surface,detail[2]))
     def draw(self):
         for button in self.buttons:
             button.draw()
@@ -342,7 +358,8 @@ def choose_skills(player : bool):
     skillMenu = Menu(menu_surface)
     bg.fill((0,0,0,0))
     skillMenu.add_text("Player " + str(player+1),(300,30))
-    skillMenu.add_buttons([("Normal Bullet",(w/3,100)),("Shot",(2*w/3,100)),("Large Bullet",(w/3,200)),("Fast Bullet",(2*w/3,200)),("Shield",(w/3,300)),("Confirm",(w/2,500)),("Quit",(w/2,800)),])
+    skillMenu.add_buttons_by_path([('picture/button1.png','picture/button1_clicked.png',(w/3,100)),('picture/button2.png','picture/button2_clicked.png',(2*w/3,100)),('picture/button3.png','picture/button3_clicked.png',(w/3,200)),('picture/button4.png','picture/button4_clicked.png',(2*w/3,200)),('picture/button5.png','picture/button5_clicked.png',(w/3,300))])
+    skillMenu.add_buttons([("Confirm",(w/2,500)),("Quit",(w/2,800)),])
     window.blit(menu_surface,(0,0))
     pygame.display.update()
     cnt = 3
