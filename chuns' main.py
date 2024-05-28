@@ -353,8 +353,14 @@ def menu_phase():
             sys.exit()
         #event.get做一次就好
 
+
 skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
 def choose_skills(player : bool):
+    warning_time = 0 #用來計時
+    font = pygame.font.SysFont("PMingLiU",25)
+    warning_text = font.render("請選擇3個技能",True,(255,10,10))
+    warning_rect = warning_text.get_rect()
+    warning_rect.center = (w/2,450)
     skillMenu = Menu(menu_surface)
     bg.fill((0,0,0,0))
     skillMenu.add_text("Player " + str(player+1),(300,30))
@@ -366,6 +372,9 @@ def choose_skills(player : bool):
     window.blit(bg,(0,0))
     while True:
         res = skillMenu.update()
+        if warning_time > 0:
+            menu_surface.blit(warning_text,warning_rect) #不知為何不會在1秒後消掉
+            warning_time -= 1
         window.blit(menu_surface, (0, 0))
         pygame.display.update()
         skillMenu.add_text("Player " + str(player+1),(300,30))
@@ -374,6 +383,7 @@ def choose_skills(player : bool):
             if cnt == 0:
                 break
             skillMenu.buttons[5].clicked = False
+            warning_time = 120
             #要能顯現錯誤訊息
             continue
         if res == -1:continue
