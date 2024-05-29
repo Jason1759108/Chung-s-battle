@@ -98,7 +98,7 @@ class Bullet2(Bullet):
         self.rect.x = self.x
         self.rect.y = self.y
         self.detect()     
-
+#巨大彈
 class Bullet3(Bullet):
     waitTime = 120
     def __init__(self, pos , isFlip):
@@ -107,18 +107,18 @@ class Bullet3(Bullet):
     def move(self):
         self.rect.x += -10 if self.isFlip else 10
         self.detect()     
-
+#快速彈
 class Bullet4(Bullet):
     waitTime = 120
     def __init__(self, pos , isFlip):
         super().__init__(isFlip,"picture/bullet4.png",pos,1)
 
     def move(self):
-        self.rect.x += -35 if self.isFlip else 35
+        self.rect.x += -30 if self.isFlip else 30
         self.detect()
-
+#防護罩
 class Shield(item):
-    waitTime = 480
+    waitTime = 180
     def __init__(self,pos,isFlip):
         super().__init__(isFlip,"picture/shield.png",game_surface,pos)
 
@@ -174,8 +174,8 @@ class Menu():
         rect.center = pos
         self.other.append((text,rect))
         return
-    def add_picture(self):
-        return #之後要補    
+    '''def add_picture(self):
+        return #之後要補    '''
     def add_button(self,text : str  ,pos):
         self.buttons.append(Button(text,self.surface,pos))
     def add_buttons(self,details : list):
