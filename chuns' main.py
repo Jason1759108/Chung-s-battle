@@ -31,6 +31,11 @@ pygame.display.update()
 heart_image = pygame.image.load("picture/heart.png")
 mainMenuBg = pygame.image.load("picture/main_bg.jpg").convert()
 mainMenuBg = pygame.transform.scale(mainMenuBg,(w,h))
+disclaimer_bg = pygame.image.load(r"picture\20240529_075958.jpg").convert()
+disclaimer_bg = pygame.transform.scale(disclaimer_bg,(h*4/3,h))
+choose_skills_bg = pygame.image.load(r"picture\20220118_110630.jpg").convert()
+choose_skills_bg = pygame.transform.scale(choose_skills_bg,(w,h))
+
 
 #載入需要的音效
 confirmSound = pygame.mixer.Sound("voice/你要確認欸.wav")
@@ -311,14 +316,15 @@ class Player(item):
 #宣告全域物件
 P1 = Player(False)
 P2 = Player(True)
-def help():
-    bg.fill((0,0,0,0))
+def disclaimer():
+    bg.fill((0,0,0))
+    bg.blit(disclaimer_bg,(300,0))
     window.blit(bg,(0,0))
-    helpMenu = Menu(menu_surface)
-    helpMenu.add_text("測試",(w/2,100))
-    helpMenu.add_button("Return",(w/2,800))
+    disclaimerMenu = Menu(menu_surface)
+    disclaimerMenu.add_text("本遊戲使用之照片，均經過秉翰本人同意後使用",(w/2,300))
+    disclaimerMenu.add_button("Return",(w/2,800))
     while True:
-        res = helpMenu.update()
+        res = disclaimerMenu.update()
         if res >= 0:
             return 
         window.blit(menu_surface, (0, 0))
@@ -328,14 +334,14 @@ def help():
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if helpMenu.buttons[0].rect.collidepoint(event.pos):  
+                if disclaimerMenu.buttons[0].rect.collidepoint(event.pos):  
                     return
 
 def menu_phase(): 
     bg.blit(mainMenuBg,(0,0))
     window.blit(bg,(0,0))
     mainMenu = Menu(menu_surface)
-    mainMenu.add_buttons([("Start",(w/2,100)),("Help",(w/2,200)),("Quit",(w/2,800))])
+    mainMenu.add_buttons([("Start",(w/2,100)),("disclaimer",(w/2,200)),("Quit",(w/2,800))])
     while True:
         mainMenu.draw()
         res = mainMenu.update()
@@ -344,7 +350,7 @@ def menu_phase():
         if res == 0:
             return
         if res == 1:
-            help()
+            disclaimer()
             mainMenu.buttons[1].clicked = False
             bg.blit(mainMenuBg,(0,0))
             window.blit(bg,(0,0))
@@ -356,13 +362,14 @@ def menu_phase():
 
 skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
 def choose_skills(player : bool):
+    bg.blit(choose_skills_bg,(0,0))
+    window.blit(bg,(0,0))
     warning_time = 0 #用來計時
     font = pygame.font.SysFont("PMingLiU",25)
     warning_text = font.render("請選擇3個技能",True,(255,10,10))
     warning_rect = warning_text.get_rect()
     warning_rect.center = (w/2,450)
     skillMenu = Menu(menu_surface)
-    bg.fill((0,0,0,0))
     skillMenu.add_text("Player " + str(player+1),(300,30))
     skillMenu.add_buttons_by_path([('picture/button1.png','picture/button1_clicked.png',(w/3,100)),('picture/button2.png','picture/button2_clicked.png',(2*w/3,100)),('picture/button3.png','picture/button3_clicked.png',(w/3,200)),('picture/button4.png','picture/button4_clicked.png',(2*w/3,200)),('picture/button5.png','picture/button5_clicked.png',(w/3,300))])
     skillMenu.add_buttons([("Confirm",(w/2,500)),("Quit",(w/2,800)),])
