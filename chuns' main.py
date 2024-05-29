@@ -221,9 +221,9 @@ class CoolBar(pygame.sprite.Sprite):
         return
     def update(self):
         size = (P2 if self.player else P1).wait[self.index]*self.fullSize/self.fullValue
-        information.blit(self.text,(350 if self.player else 950,100+self.index*50))
+        information.blit(self.text,(w*7//36 if self.player else w*19//36,100+self.index*50))
         if self.player:
-            pygame.draw.rect(information,(20,20,100+self.index*30),(w*3/4,100+self.index*50,size,20))
+            pygame.draw.rect(information,(20,20,100+self.index*30),(w*7/12,100+self.index*50,size,20))
         else:
             pygame.draw.rect(information,(100+self.index*30,20,20),(w/4,100+self.index*50,size,20))
         
