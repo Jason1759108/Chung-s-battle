@@ -269,8 +269,15 @@ class Player(item):
         self.bullets = pygame.sprite.Group()
         self.coolBars = pygame.sprite.Group()
         self.shields = pygame.sprite.Group()
-        for i in range(self.HP):
-            information.blit(heart_image,((w-50*(FULL_HP-1)-110-33 if self.isFlip else 110)+i*50,10))       
+    def restart(self):
+        super().__init__(self.isFlip,"picture/circle face.png",game_surface,(w*8//9 , h/2) if self.isFlip else (w//9 , h/2))
+        self.HP = FULL_HP
+        self.wait = [0 for _ in range(5)]
+        self.skills = []
+        self.bullets = pygame.sprite.Group()
+        self.coolBars = pygame.sprite.Group()
+        self.shields = pygame.sprite.Group()
+        return
     def set_skills(self,skill1,skill2,skill3 = 0 ,skill4 = 0 ,skill5 = 0):
         self.skills = [None for _ in range(5)]
         self.skills[0] = skill1
@@ -430,86 +437,93 @@ def choose_skills(player : bool):
         if res == 7:
             pygame.quit()
             sys.exit()
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
     for i in range(len(skillList)):
         if skillMenu.buttons[i].clicked:
             (P2 if player else P1).skills.append(skillList[i])
     return
+
+
+def game():        
+    menu_phase()
+    choose_skills(False)
+    choose_skills(True)
+    P1.buildCoolBar()
+    P2.buildCoolBar()
+
+    bg.fill((0,0,0))
+    pygame.draw.line(bg, (255, 255, 255), (w//6, 0), (w//6, 900), 4)
+    pygame.draw.line(bg, (255, 255, 255), (w*5//6, 0), (w*5//6, 900), 4)
+    pygame.draw.line(bg, (100, 100, 100), (w/2, 0), (w/2, 900), 4)
+
+    while P1.HP > 0 and P2.HP > 0:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            P1.up()
+        if keys[pygame.K_s]:
+            P1.down()
+        if keys[pygame.K_a]:
+            P1.left()
+        if keys[pygame.K_d]:
+            P1.right()
+        if keys[pygame.K_j]:
+            P1.shoot(0)
+        if keys[pygame.K_k]:
+            P1.shoot(1)
+        if keys[pygame.K_l]:
+            P1.shoot(2)
         
-        
-menu_phase()
-choose_skills(False)
-choose_skills(True)
-P1.buildCoolBar()
-P2.buildCoolBar()
+        if keys[pygame.K_UP]:
+            P2.up()
+        if keys[pygame.K_DOWN]:
+            P2.down()
+        if keys[pygame.K_LEFT]:
+            P2.left()
+        if keys[pygame.K_RIGHT]:
+            P2.right()
+        if keys[pygame.K_KP1]:
+            P2.shoot(0)
+        if keys[pygame.K_KP2]:
+            P2.shoot(1)
+        if keys[pygame.K_KP3]:
+            P2.shoot(2)
 
-bg.fill((0,0,0))
-pygame.draw.line(bg, (255, 255, 255), (w//6, 0), (w//6, 900), 4)
-pygame.draw.line(bg, (255, 255, 255), (w*5//6, 0), (w*5//6, 900), 4)
-pygame.draw.line(bg, (100, 100, 100), (w/2, 0), (w/2, 900), 4)
+        window.blit(bg, (0, 0))
+        game_surface.fill((0,0,0,0))
+        information.fill((0,0,0,0))
+        P1.update()
+        P2.update()
+        window.blit(game_surface,(0,0))
+        window.blit(information,(0,0))
+        pygame.display.update()
+        fpsClock.tick(FPS)  # 控制幀率
+    return
 
-while P1.HP > 0 and P2.HP > 0:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        P1.up()
-    if keys[pygame.K_s]:
-        P1.down()
-    if keys[pygame.K_a]:
-        P1.left()
-    if keys[pygame.K_d]:
-        P1.right()
-    if keys[pygame.K_j]:
-        P1.shoot(0)
-    if keys[pygame.K_k]:
-        P1.shoot(1)
-    if keys[pygame.K_l]:
-        P1.shoot(2)
-    
-    if keys[pygame.K_UP]:
-        P2.up()
-    if keys[pygame.K_DOWN]:
-        P2.down()
-    if keys[pygame.K_LEFT]:
-        P2.left()
-    if keys[pygame.K_RIGHT]:
-        P2.right()
-    if keys[pygame.K_KP1]:
-        P2.shoot(0)
-    if keys[pygame.K_KP2]:
-        P2.shoot(1)
-    if keys[pygame.K_KP3]:
-        P2.shoot(2)
-
-    window.blit(bg, (0, 0))
-    game_surface.fill((0,0,0,0))
+game()
+while True:
+    #最後一次更新
     information.fill((0,0,0,0))
+    game_surface.fill((0,0,0,0))
     P1.update()
-    P2.update()
+    P2.update()   
+    window.blit(bg,(0,0))
     window.blit(game_surface,(0,0))
     window.blit(information,(0,0))
-    pygame.display.update()
-    fpsClock.tick(FPS)  # 控制幀率
-
-#最後一次更新
-information.fill((0,0,0,0))
-game_surface.fill((0,0,0,0))
-P1.update()
-P2.update()   
-window.blit(bg,(0,0))
-window.blit(game_surface,(0,0))
-window.blit(information,(0,0))
-
-pygame.display.update()
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
+    last_menu = Menu(menu_surface)
+    last_menu.add_buttons([('Quit',(w*2/5,h/2)),('Play Again',(w*3/5,h/2))])
+    while True:
+        res = last_menu.update()
+        if res == 0:
             pygame.quit()
             sys.exit()
+        elif res == 1:
+            P1.restart()
+            P2.restart()
+            game()
+            break
+        window.blit(menu_surface, (0, 0))
+        pygame.display.update()
