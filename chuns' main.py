@@ -16,7 +16,7 @@ pygame.display.set_caption("彈幕對戰")
 #製作三張圖層
 bg = pygame.Surface(window.get_size(),pygame.SRCALPHA) #背景
 bg = bg.convert()
-bg.fill((0, 0, 0))
+bg.fill((0,0,0))
 game_surface = pygame.Surface(window.get_size(),pygame.SRCALPHA) #遊戲區塊
 game_surface.fill((0,0,0,0))
 information = pygame.Surface(window.get_size(),pygame.SRCALPHA) #資訊區塊
@@ -26,6 +26,10 @@ window.blit(bg, (0, 0))
 window.blit(game_surface, (0, 0))
 window.blit(information, (0, 0))
 pygame.display.update()
+
+#常數
+PLAYER_SZ = 130
+FULL_HP = 5
 
 #匯入需要的全域圖片
 heart_image = pygame.image.load("picture/heart.png")
@@ -77,14 +81,14 @@ class Bullet(item):
 class Bullet1(Bullet):
     waitTime = 60
     def __init__(self, pos , isFlip):
-        super().__init__(isFlip,"picture/bullet.png",pos,1)
+        super().__init__(isFlip,"picture/bullet.png",pos,2)
 
     def move(self):
         self.rect.x += -20 if self.isFlip else 20
         self.detect()     
 #散彈
 class Bullet2(Bullet):
-    waitTime = 120
+    waitTime = 180
     dx , dy = 0 , 0
     x , y = 0 , 0
     def __init__(self, pos , isFlip):
@@ -102,7 +106,7 @@ class Bullet2(Bullet):
 class Bullet3(Bullet):
     waitTime = 120
     def __init__(self, pos , isFlip):
-        super().__init__(isFlip,"picture/bullet3.png",pos,2)
+        super().__init__(isFlip,"picture/bullet3.png",pos,3)
 
     def move(self):
         self.rect.x += -10 if self.isFlip else 10
@@ -111,7 +115,7 @@ class Bullet3(Bullet):
 class Bullet4(Bullet):
     waitTime = 120
     def __init__(self, pos , isFlip):
-        super().__init__(isFlip,"picture/bullet4.png",pos,1)
+        super().__init__(isFlip,"picture/bullet4.png",pos,2)
 
     def move(self):
         self.rect.x += -30 if self.isFlip else 30
@@ -205,7 +209,7 @@ class Menu():
         return ret
     
 class CoolBar(pygame.sprite.Sprite):
-    fullSize = 400
+    fullSize = w*2//9
     def __init__(self,text : str , player : bool , index : int , fullValue : int):
         super().__init__()
         self.text = text
@@ -219,27 +223,27 @@ class CoolBar(pygame.sprite.Sprite):
         size = (P2 if self.player else P1).wait[self.index]*self.fullSize/self.fullValue
         information.blit(self.text,(350 if self.player else 950,100+self.index*50))
         if self.player:
-            pygame.draw.rect(information,(20,20,100+self.index*30),(1050,100+self.index*50,size,20))
+            pygame.draw.rect(information,(20,20,100+self.index*30),(w*3/4,100+self.index*50,size,20))
         else:
-            pygame.draw.rect(information,(100+self.index*30,20,20),(450,100+self.index*50,size,20))
+            pygame.draw.rect(information,(100+self.index*30,20,20),(w/4,100+self.index*50,size,20))
         
 
 #玩家
 class Player(item):
-    HP = 3
     x = 0
     y = 0
     shield_exist_time = 0
     isFlip = False
     def __init__(self,isFlip):
-        super().__init__(isFlip,"picture/circle face.png",game_surface,(w - 200 , 450) if isFlip else (200 , 450))
+        super().__init__(isFlip,"picture/circle face.png",game_surface,(w*8//9 , h/2) if isFlip else (w//9 , h/2))
+        self.HP = FULL_HP
         self.wait = [0 for _ in range(5)]
         self.skills = []
         self.bullets = pygame.sprite.Group()
         self.coolBars = pygame.sprite.Group()
         self.shields = pygame.sprite.Group()
         for i in range(self.HP):
-            information.blit(heart_image,(120+self.isFlip*(w-380)+i*50,10))        
+            information.blit(heart_image,((w-50*(FULL_HP-1)-110-33 if self.isFlip else 110)+i*50,10))       
     def set_skills(self,skill1,skill2,skill3 = 0 ,skill4 = 0 ,skill5 = 0):
         self.skills = [None for _ in range(5)]
         self.skills[0] = skill1
@@ -271,7 +275,7 @@ class Player(item):
             self.rect.y -= 5
 
     def down(self):
-        if self.rect.y <= h - 135:
+        if self.rect.y <= h - 5 - PLAYER_SZ:
             self.rect.y += 5
 
     def left(self):
@@ -279,7 +283,7 @@ class Player(item):
             self.rect.x -= 5
 
     def right(self):
-        if self.rect.x <= (w - 130 if self.isFlip else 170):
+        if self.rect.x <= (w - PLAYER_SZ if self.isFlip else 300-PLAYER_SZ):
             self.rect.x += 5
     #更新所有資訊
     def update(self):
@@ -297,7 +301,7 @@ class Player(item):
                 s.kill()
             else:
                 self.shield_exist_time -= 1
-                s.rect.x = self.rect.x -110 if self.isFlip else self.rect.x + 130
+                s.rect.x = self.rect.x - 110 if self.isFlip else self.rect.x + PLAYER_SZ
                 s.rect.y = self.rect.y - 58
                 s.draw() 
         if self.HP <= 0:
@@ -305,7 +309,7 @@ class Player(item):
             self.image = pygame.transform.flip(self.image,self.isFlip,0)
         else:
             for i in range(self.HP):
-                information.blit(heart_image,((w-380 if self.isFlip else 0)+120+i*50,10))
+                information.blit(heart_image,((w-50*(FULL_HP-1)-110-33 if self.isFlip else 110)+i*50,10)) #33是愛心的寬度
             
 
         for coolBar in self.coolBars:
@@ -321,8 +325,8 @@ def disclaimer():
     bg.blit(disclaimer_bg,(300,0))
     window.blit(bg,(0,0))
     disclaimerMenu = Menu(menu_surface)
-    disclaimerMenu.add_text("本遊戲使用之照片，均經過秉翰本人同意後使用",(w/2,300))
-    disclaimerMenu.add_button("Return",(w/2,800))
+    disclaimerMenu.add_text("本遊戲使用之照片，均經過秉翰本人同意後使用",(w/2,h/3))
+    disclaimerMenu.add_button("Return",(w/2,h*8/9))
     while True:
         res = disclaimerMenu.update()
         if res >= 0:
@@ -357,7 +361,6 @@ def menu_phase():
         elif res == 2:
             pygame.quit()
             sys.exit()
-        #event.get做一次就好
 
 
 skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
@@ -368,9 +371,9 @@ def choose_skills(player : bool):
     font = pygame.font.SysFont("PMingLiU",25)
     warning_text = font.render("請選擇3個技能",True,(255,10,10))
     warning_rect = warning_text.get_rect()
-    warning_rect.center = (w/2,450)
+    warning_rect.center = (w/2,h/2)
     skillMenu = Menu(menu_surface)
-    skillMenu.add_text("Player " + str(player+1),(300,30))
+    skillMenu.add_text("Player " + str(player+1),(w/6,h/30))
     skillMenu.add_buttons_by_path([('picture/button1.png','picture/button1_clicked.png',(w/3,100)),('picture/button2.png','picture/button2_clicked.png',(2*w/3,100)),('picture/button3.png','picture/button3_clicked.png',(w/3,200)),('picture/button4.png','picture/button4_clicked.png',(2*w/3,200)),('picture/button5.png','picture/button5_clicked.png',(w/3,300))])
     skillMenu.add_buttons([("Confirm",(w/2,500)),("Quit",(w/2,800)),])
     window.blit(menu_surface,(0,0))
@@ -384,7 +387,7 @@ def choose_skills(player : bool):
             warning_time -= 1
         window.blit(menu_surface, (0, 0))
         pygame.display.update()
-        skillMenu.add_text("Player " + str(player+1),(300,30))
+        skillMenu.add_text("Player " + str(player+1),(w/6,h/30))
         if res == 5:
             confirmSound.play()
             if cnt == 0:
@@ -417,8 +420,8 @@ P1.buildCoolBar()
 P2.buildCoolBar()
 
 bg.fill((0,0,0))
-pygame.draw.line(bg, (255, 255, 255), (300, 0), (300, 900), 4)
-pygame.draw.line(bg, (255, 255, 255), (w-300, 0), (w-300, 900), 4)
+pygame.draw.line(bg, (255, 255, 255), (w//6, 0), (w//6, 900), 4)
+pygame.draw.line(bg, (255, 255, 255), (w*5//6, 0), (w*5//6, 900), 4)
 pygame.draw.line(bg, (100, 100, 100), (w/2, 0), (w/2, 900), 4)
 
 while P1.HP > 0 and P2.HP > 0:
