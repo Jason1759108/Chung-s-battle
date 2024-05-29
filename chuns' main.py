@@ -13,7 +13,7 @@ fpsClock = pygame.time.Clock()
 window = pygame.display.set_mode((w, h))
 pygame.display.set_caption("彈幕對戰")
 
-#製作三張圖層
+#製作四張圖層
 bg = pygame.Surface(window.get_size(),pygame.SRCALPHA) #背景
 bg = bg.convert()
 bg.fill((0,0,0))
@@ -21,7 +21,7 @@ game_surface = pygame.Surface(window.get_size(),pygame.SRCALPHA) #遊戲區塊
 game_surface.fill((0,0,0,0))
 information = pygame.Surface(window.get_size(),pygame.SRCALPHA) #資訊區塊
 information.fill((0,0,0,0))
-menu_surface = pygame.Surface(window.get_size(),pygame.SRCALPHA)
+menu_surface = pygame.Surface(window.get_size(),pygame.SRCALPHA) #選單
 window.blit(bg, (0, 0))
 window.blit(game_surface, (0, 0))
 window.blit(information, (0, 0))
@@ -63,6 +63,8 @@ class item(pygame.sprite.Sprite):
     def draw(self):
         self.surface.blit(self.image,self.rect)
         return
+
+#子彈
 class Bullet(item):
     def __init__(self ,isFlip : bool, image_path : str , pos : tuple, dHP : int):
         super().__init__(isFlip,image_path,game_surface,pos)
@@ -86,24 +88,9 @@ class Bullet1(Bullet):
     def move(self):
         self.rect.x += -20 if self.isFlip else 20
         self.detect()     
+
 #散彈
-class Bullet21(Bullet):
-    waitTime = 180
-    dx , dy = 0 , 0
-    x , y = 0 , 0
-    def __init__(self, pos , isFlip):
-        super().__init__(isFlip,"picture/Bullet2.png",pos,1)
-        theta = radians(randint(-20,20))
-        self.dx , self.dy = 3*(-1 if isFlip else 1)*cos(theta) , 3*sin(theta)
-        self.x , self.y = self.rect.x , self.rect.y
-    def move(self):
-        self.x += self.dx
-        self.y += self.dy
-        self.rect.x = self.x
-        self.rect.y = self.y
-        self.detect()
-#散彈
-class Bullet22(Bullet):
+class Bullet2(Bullet):
     waitTime = 180
     dx , dy = 0 , 0
     x , y = 0 , 0
@@ -205,8 +192,6 @@ class Menu():
         rect.center = pos
         self.other.append((text,rect))
         return
-    '''def add_picture(self):
-        return #之後要補    '''
     def add_button(self,text : str  ,pos):
         self.buttons.append(Button(text,self.surface,pos))
     def add_buttons(self,details : list):
@@ -292,7 +277,7 @@ class Player(item):
         return
     def shoot(self,index):
         if self.wait[index] == 0:
-            if self.skills[index] == Bullet21 or self.skills[index] == Bullet22:
+            if self.skills[index] == Bullet2:
                 for _ in range(3):
                     bullet = self.skills[index](self.rect.center,self.isFlip)
                     self.bullets.add(bullet)
@@ -397,7 +382,7 @@ def menu_phase():
             sys.exit()
 
 
-skillList = [Bullet1,Bullet22,Bullet3,Bullet4,Bullet5,Shield]
+skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Bullet5,Shield]
 def choose_skills(player : bool):
     bg.blit(choose_skills_bg,(0,0))
     window.blit(bg,(0,0))
