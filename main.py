@@ -411,7 +411,7 @@ def choose_skills(player : bool):
             confirmSound.play()
             if cnt == 0:
                 break
-            skillMenu.buttons[5].clicked = False
+            skillMenu.buttons[6].clicked = False
             warning_time = 120
             #要能顯現錯誤訊息
             continue
