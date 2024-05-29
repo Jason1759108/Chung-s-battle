@@ -87,12 +87,12 @@ class Bullet1(Bullet):
         self.rect.x += -20 if self.isFlip else 20
         self.detect()     
 #散彈
-class Bullet2(Bullet):
+class Bullet21(Bullet):
     waitTime = 180
     dx , dy = 0 , 0
     x , y = 0 , 0
     def __init__(self, pos , isFlip):
-        super().__init__(isFlip,"picture/bullet2.png",pos,1)
+        super().__init__(isFlip,"picture/Bullet2.png",pos,1)
         theta = radians(randint(-20,20))
         self.dx , self.dy = 3*(-1 if isFlip else 1)*cos(theta) , 3*sin(theta)
         self.x , self.y = self.rect.x , self.rect.y
@@ -101,7 +101,23 @@ class Bullet2(Bullet):
         self.y += self.dy
         self.rect.x = self.x
         self.rect.y = self.y
-        self.detect()     
+        self.detect()
+#散彈
+class Bullet22(Bullet):
+    waitTime = 180
+    dx , dy = 0 , 0
+    x , y = 0 , 0
+    def __init__(self, pos , isFlip):
+        super().__init__(isFlip,"picture/Bullet2.png",pos,1)
+        theta = radians(randint(-20,20)/3)
+        self.dx , self.dy = 5*(-1 if isFlip else 1)*cos(theta) , 5*sin(theta)
+        self.x , self.y = self.rect.x , self.rect.y
+    def move(self):
+        self.x += self.dx
+        self.y += self.dy
+        self.rect.x = self.x
+        self.rect.y = self.y
+        self.detect()
 #巨大彈
 class Bullet3(Bullet):
     waitTime = 120
@@ -120,6 +136,17 @@ class Bullet4(Bullet):
     def move(self):
         self.rect.x += -30 if self.isFlip else 30
         self.detect()
+class Bullet5(Bullet):
+    waitTime = 90
+    def __init__(self,pos,isFlip):
+        super().__init__(isFlip,"picture/bullet5.png",pos,1)
+        self.delay_time = 60
+    def move(self):
+        if self.delay_time > 0:
+            self.delay_time -= 1
+        else:
+            self.rect.x += -10 if self.isFlip else 10
+            self.detect()
 #防護罩
 class Shield(item):
     waitTime = 180
@@ -258,8 +285,8 @@ class Player(item):
         return
     def shoot(self,index):
         if self.wait[index] == 0:
-            if self.skills[index] == Bullet2:
-                for _ in range(7):
+            if self.skills[index] == Bullet21 or self.skills[index] == Bullet22:
+                for _ in range(3):
                     bullet = self.skills[index](self.rect.center,self.isFlip)
                     self.bullets.add(bullet)
             elif self.skills[index] == Shield:
@@ -363,7 +390,7 @@ def menu_phase():
             sys.exit()
 
 
-skillList = [Bullet1,Bullet2,Bullet3,Bullet4,Shield]
+skillList = [Bullet1,Bullet22,Bullet3,Bullet4,Bullet5,Shield]
 def choose_skills(player : bool):
     bg.blit(choose_skills_bg,(0,0))
     window.blit(bg,(0,0))
@@ -374,7 +401,7 @@ def choose_skills(player : bool):
     warning_rect.center = (w/2,h/2)
     skillMenu = Menu(menu_surface)
     skillMenu.add_text("Player " + str(player+1),(w/6,h/30))
-    skillMenu.add_buttons_by_path([('picture/button1.png','picture/button1_clicked.png',(w/3,100)),('picture/button2.png','picture/button2_clicked.png',(2*w/3,100)),('picture/button3.png','picture/button3_clicked.png',(w/3,200)),('picture/button4.png','picture/button4_clicked.png',(2*w/3,200)),('picture/button5.png','picture/button5_clicked.png',(w/3,300))])
+    skillMenu.add_buttons_by_path([('picture/button1.png','picture/button1_clicked.png',(w/3,100)),('picture/button2.png','picture/button2_clicked.png',(2*w/3,100)),('picture/button3.png','picture/button3_clicked.png',(w/3,200)),('picture/button4.png','picture/button4_clicked.png',(2*w/3,200)),('picture/button5.png','picture/button5_clicked.png',(w/3,300)),('picture/button6.png','picture/button6_clicked.png',(w*2/3,300))])
     skillMenu.add_buttons([("Confirm",(w/2,500)),("Quit",(w/2,800)),])
     window.blit(menu_surface,(0,0))
     pygame.display.update()
@@ -388,7 +415,7 @@ def choose_skills(player : bool):
         window.blit(menu_surface, (0, 0))
         pygame.display.update()
         skillMenu.add_text("Player " + str(player+1),(w/6,h/30))
-        if res == 5:
+        if res == 6:
             confirmSound.play()
             if cnt == 0:
                 break
@@ -400,7 +427,7 @@ def choose_skills(player : bool):
         if skillMenu.buttons[res].clicked:
             cnt -= 1
         else:cnt += 1
-        if res == 6:
+        if res == 7:
             pygame.quit()
             sys.exit()
         for event in pygame.event.get():
